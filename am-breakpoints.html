@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/elements/dom-if.html">
 <link rel="import" href="../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 
@@ -10,23 +11,31 @@
       }
     </style>
 
-    <dom-repeat items="{{queries}}" as="queryObj">
+    <dom-if if="[[__isMaster]]">
       <template>
-        <iron-media-query
-          query="[[queryObj.query]]"
-          query-matches="{{queryObj.active}}"
-          on-query-matches-changed="__computeActiveQueries"
-          full
-        ></iron-media-query>
+        <dom-repeat items="{{queries}}" as="queryObj">
+          <template>
+            <iron-media-query
+              query="[[queryObj.query]]"
+              query-matches="{{queryObj.active}}"
+              on-query-matches-changed="__computeActiveQueries"
+              full
+            ></iron-media-query>
+          </template>
+        </dom-repeat>
       </template>
-    </dom-repeat>
+    </dom-if>
   </template>
 
   <script>
+    window.am = window.am || {};
     /**
      * `am-breakpoints`
      * An element used to match on breakpoints derived from the material design guidelines for responsive UI:
      *  https://material.io/guidelines/layout/responsive-ui.html#responsive-ui-breakpoints
+     * The first instance bound into your app is flagged as the master and all others are considered slaves, this
+     *  is used to prevent the same query parameters from having to be replicated everywhere, the slaves will bind
+     *  to the events fired by the master so they can reflect the flagged queries as needed
      *
      * Device names, later referred to as `breakpoints`, are derived from the breakpoint system where:
      *  * handset/tablets in portrait are named as - `<size>-<device>`
@@ -246,7 +255,43 @@
             notify: true,
             readOnly: true,
           },
+          // Private properties
+          __isMaster: {
+            type: Boolean,
+            value: true,
+            readOnly: true,
+          },
         };
+      }
+      /* Lifecycle Methods */
+      constructor() {
+        super();
+        if (window.am.breakpoints) {
+          this._set__isMaster(false);
+        } else {
+          window.am.breakpoints = this;
+        }
+        this.__updateProperty = this.__updateProperty.bind(this);
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        const primaryEl = window.am.breakpoints;
+        if (!this.__isMaster && primaryEl) {
+          primaryEl.addEventListener('matches-changed', this.__updateProperty);
+          primaryEl.addEventListener('max-columns-changed', this.__updateProperty);
+          primaryEl.addEventListener('max-gutter-changed', this.__updateProperty);
+          primaryEl.addEventListener('queries-changed', this.__updateProperty);
+        }
+      }
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        const primaryEl = window.am.breakpoints;
+        if (!this.__isMaster && primaryEl) {
+          primaryEl.removeEventListener('matches-changed', this.__updateProperty);
+          primaryEl.removeEventListener('max-columns-changed', this.__updateProperty);
+          primaryEl.removeEventListener('max-gutter-changed', this.__updateProperty);
+          primaryEl.removeEventListener('queries-changed', this.__updateProperty);
+        }
       }
 
       /* Private Methods */
@@ -298,6 +343,37 @@
         return matchers.some((matcher) => {
           return matcher && activeMatchers.includes(matcher);
         });
+      }
+      /**
+       * Used to reflect changes from the primary element into this element
+       * @private
+       *
+       * @param {CustomEvent} event
+       */
+      __updateProperty(event) {
+        const path = event.detail.path;
+        const value = event.detail.value;
+        if (path) {
+          this.set(path, value);
+        } else {
+          const type = event.type.
+            replace('-changed', '').
+            replace(/-(.)/g, (match, char) => {
+              return char.toUpperCase();
+            });
+          const privateSetter = `_set${type.replace(/(.)/, (match, char) => {
+            if (char !== '_') {
+              return char.toUpperCase();
+            } else {
+              return char;
+            }
+          })}`;
+          if (this[privateSetter]) {
+            this[privateSetter](value);
+          } else {
+            this.set(type, value);
+          }
+        }
       }
     }
 
