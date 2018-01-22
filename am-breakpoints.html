@@ -1,0 +1,382 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/elements/dom-if.html">
+<link rel="import" href="../polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+
+<dom-module id="am-breakpoints">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+
+    <dom-if if="[[__isMaster]]">
+      <template>
+        <dom-repeat items="{{queries}}" as="queryObj">
+          <template>
+            <iron-media-query
+              query="[[queryObj.query]]"
+              query-matches="{{queryObj.active}}"
+              on-query-matches-changed="__computeActiveQueries"
+              full
+            ></iron-media-query>
+          </template>
+        </dom-repeat>
+      </template>
+    </dom-if>
+  </template>
+
+  <script>
+    window.am = window.am || {};
+    /**
+     * `am-breakpoints`
+     * An element used to match on breakpoints derived from the material design guidelines for responsive UI:
+     *  https://material.io/guidelines/layout/responsive-ui.html#responsive-ui-breakpoints
+     * The first instance bound into your app is flagged as the master and all others are considered slaves, this
+     *  is used to prevent the same query parameters from having to be replicated everywhere, the slaves will bind
+     *  to the events fired by the master so they can reflect the flagged queries as needed
+     *
+     * Device names, later referred to as `breakpoints`, are derived from the breakpoint system where:
+     *  * handset/tablets in portrait are named as - `<size>-<device>`
+     *  * handsets/tablets in landscape are named as - `<size>-<device>-landscape`
+     *  * window (includes all devices) are named as - `<size>`
+     *
+     * Breakpoint examples:
+     *  * Large handset in portrait: `large-handset`
+     *  * Large tablet in landscape: `large-tablet-landscape`
+     *  * all extra small devices: `xsmall`
+     *  * all small devices + large handsets in portrait: `small,large-handset` or `small large-handset`
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class AmBreakpoints extends Polymer.Element {
+      static get is() {
+        return 'am-breakpoints';
+      }
+      static get properties() {
+        return {
+          // User defined
+          /* The breakpoints to match on, derived from the material design device names*/
+          breakpoints: String,
+          // User overridable
+          /* The debounce duration, defaults to microtasking */
+          debounceDuration: {
+            type: Number,
+            value: 0,
+          },
+          /* The maximum number of columns that can be set, you'll want to update queries if you change this */
+          maxColumns: {
+            type: Number,
+            value: 12,
+          },
+          /* The maximum gutter value that can be set, you'll want to update queries if you change this */
+          maxGutter: {
+            type: Number,
+            value: 24,
+          },
+          /* The material design specification for queries */
+          queries: {
+            type: Array,
+            value() {
+              return [
+                /* alternate mediatypes */
+                {
+                  matches: 'print',
+                  query: 'only print',
+                },
+                {
+                  matches: 'speech',
+                  query: 'only speech',
+                },
+                /* portrait devices */
+                {
+                  breakpoint: 0,
+                  columns: 4,
+                  gutter: 16,
+                  matches: 'small-handset',
+                  query: 'only screen and (max-width: 359px) and (orientation: portrait)',
+                },
+                {
+                  breakpoint: 360,
+                  columns: 4,
+                  gutter: 16,
+                  matches: 'medium-handset',
+                  query: 'only screen and (min-width: 360px) and (max-width: 399px) and (orientation: portrait)',
+                },
+                {
+                  breakpoint: 400,
+                  columns: 4,
+                  gutter: 16,
+                  matches: 'large-handset',
+                  query: 'only screen and (min-width: 400px) and (max-width: 599px) and (orientation: portrait)',
+                },
+                {
+                  breakpoint: 600,
+                  columns: 8,
+                  gutter: 24,
+                  matches: 'small-tablet',
+                  query: 'only screen and (min-width: 600px) and (max-width: 719px) and (orientation: portrait)',
+                },
+                {
+                  breakpoint: 720,
+                  columns: 8,
+                  gutter: 24,
+                  matches: 'large-tablet',
+                  query: 'only screen and (min-width: 720px) and (max-width: 839px) and (orientation: portrait)',
+                },
+                {
+                  breakpoint: 840,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'large-tablet',
+                  query: 'only screen and (min-width: 840px) and (max-width: 959px) and (orientation: portrait)',
+                },
+                /* landscape devices */
+                {
+                  breakpoint: 480,
+                  columns: 4,
+                  gutter: 16,
+                  matches: 'small-handset-landscape',
+                  query: 'only screen and (min-width: 480px) and (max-width: 599px) and (orientation: landscape)',
+                },
+                {
+                  breakpoint: 600,
+                  columns: 8,
+                  gutter: 16,
+                  matches: 'medium-handset-landscape',
+                  query: 'only screen and (min-width: 600px) and (max-width: 719px) and (orientation: landscape)',
+                },
+                {
+                  breakpoint: 720,
+                  columns: 8,
+                  gutter: 16,
+                  matches: 'large-handset-landscape',
+                  query: 'only screen and (min-width: 600px) and (max-width: 719px) and (orientation: landscape)',
+                },
+                {
+                  breakpoint: 840,
+                  columns: 12,
+                  gutter: 16,
+                  matches: 'large-handset-landscape',
+                  query: 'only screen and (min-width: 840px) and (max-width: 959px) and (orientation: landscape)',
+                },
+                {
+                  breakpoint: 960,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'small-tablet-landscape',
+                  query: 'only screen and (min-width: 960px) and (max-width: 1023px) and (orientation: landscape)',
+                },
+                {
+                  breakpoint: 1024,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'large-tablet-landscape',
+                  query: 'only screen and (min-width: 1024px) and (max-width: 1439px) and (orientation: landscape)',
+                },
+                /* window */
+                {
+                  breakpoint: 0,
+                  columns: 4,
+                  gutter: 16,
+                  matches: 'xsmall',
+                  query: 'only screen and (max-width: 599px)',
+                },
+                {
+                  breakpoint: 600,
+                  columns: 8,
+                  gutter: 24,
+                  matches: 'small',
+                  query: 'only screen and (min-width: 600px) and (max-width: 839px)',
+                },
+                {
+                  breakpoint: 840,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'small',
+                  query: 'only screen and (min-width: 840px) and (max-width: 1007px)',
+                },
+                {
+                  breakpoint: 1024,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'medium',
+                  query: 'only screen and (min-width: 1008px) and (max-width: 1423px)',
+                },
+                {
+                  breakpoint: 1440,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'large',
+                  query: 'only screen and (min-width: 1424px) and (max-width: 1903px)',
+                },
+                {
+                  breakpoint: 1920,
+                  columns: 12,
+                  gutter: 24,
+                  matches: 'xlarge',
+                  query: 'only screen and (min-width: 1904px)',
+                },
+              ];
+            },
+          },
+          // ReadOnly properties
+          /* Whether or not the breakpoints are matching */
+          active: {
+            type: Boolean,
+            computed: '__computeActive(breakpoints, matches)',
+            notify: true,
+            readOnly: true,
+          },
+          /* All queries that are currently being matched against the provided breakpoints */
+          activeQueries: {
+            type: Array,
+            notify: true,
+            readOnly: true,
+          },
+          /* The lowest column value among the activeQueries, starts based on maxColumns */
+          columns: {
+            type: Number,
+            notify: true,
+            readOnly: true,
+          },
+          /* The lowest gutter value among the activeQueries, starts based on maxGutter */
+          gutter: {
+            type: Number,
+            notify: true,
+            readOnly: true,
+          },
+          /* The device names that are currently being matched on */
+          matches: {
+            type: String,
+            notify: true,
+            readOnly: true,
+          },
+          // Private properties
+          __isMaster: {
+            type: Boolean,
+            value: true,
+            readOnly: true,
+          },
+        };
+      }
+      /* Lifecycle Methods */
+      constructor() {
+        super();
+        if (window.am.breakpoints) {
+          this._set__isMaster(false);
+        } else {
+          window.am.breakpoints = this;
+        }
+        this.__updateProperty = this.__updateProperty.bind(this);
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        const primaryEl = window.am.breakpoints;
+        if (!this.__isMaster && primaryEl) {
+          primaryEl.addEventListener('matches-changed', this.__updateProperty);
+          primaryEl.addEventListener('max-columns-changed', this.__updateProperty);
+          primaryEl.addEventListener('max-gutter-changed', this.__updateProperty);
+          primaryEl.addEventListener('queries-changed', this.__updateProperty);
+        }
+      }
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        const primaryEl = window.am.breakpoints;
+        if (!this.__isMaster && primaryEl) {
+          primaryEl.removeEventListener('matches-changed', this.__updateProperty);
+          primaryEl.removeEventListener('max-columns-changed', this.__updateProperty);
+          primaryEl.removeEventListener('max-gutter-changed', this.__updateProperty);
+          primaryEl.removeEventListener('queries-changed', this.__updateProperty);
+        }
+      }
+
+      /* Private Methods */
+      /**
+       * Builds out the activeQueries and all properties derived from it: columns, gutter, matches
+       * @private
+       */
+      __computeActiveQueries() {
+        // Debouncing to reduce the number of redraws and times this logic has to run
+        this.__debouncer = Polymer.Debouncer.debounce(
+          this.__debouncer,
+          Polymer.Async.timeOut.after(this.debounceDuration),
+          () => {
+            // Build and assign activeQueries
+            const activeQueries = this.queries.
+              // only worry about active queries
+              filter((query) => {
+                return query.active;
+              });
+            // Set the activeQuery to the largest query
+            this._setActiveQueries(activeQueries);
+            // Build out columns, matches, and gutter
+            let columns = this.maxColumns;
+            let gutter = this.maxGutter;
+            let matches = '';
+            activeQueries.forEach((query) => {
+              columns = Math.min(columns, query.columns);
+              gutter = Math.min(gutter, query.gutter);
+              matches += `${matches ? ',' : ''}${query.matches}`;
+            });
+            this._setColumns(columns);
+            this._setGutter(gutter);
+            this._setMatches(matches);
+          }
+        );
+      }
+      /**
+       * Computes the active property based on the provided breakpoints and what's currently being matched on
+       * @private
+       *
+       * @param {String} breakpoints
+       * @param {String} matches
+       * @return {Boolean}
+       */
+      __computeActive(breakpoints, matches) {
+        // split on space or , for convenience to our users
+        const matchers = (breakpoints || '').split(/[\ \,]/);
+        const activeMatchers = (matches || '').split(/[\ \,]/);
+        return matchers.some((matcher) => {
+          return matcher && activeMatchers.includes(matcher);
+        });
+      }
+      /**
+       * Used to reflect changes from the primary element into this element
+       * @private
+       *
+       * @param {CustomEvent} event
+       */
+      __updateProperty(event) {
+        const path = event.detail.path;
+        const value = event.detail.value;
+        if (path) {
+          this.set(path, value);
+        } else {
+          const type = event.type.
+            replace('-changed', '').
+            replace(/-(.)/g, (match, char) => {
+              return char.toUpperCase();
+            });
+          const privateSetter = `_set${type.replace(/(.)/, (match, char) => {
+            if (char !== '_') {
+              return char.toUpperCase();
+            } else {
+              return char;
+            }
+          })}`;
+          if (this[privateSetter]) {
+            this[privateSetter](value);
+          } else {
+            this.set(type, value);
+          }
+        }
+      }
+    }
+
+    window.customElements.define(AmBreakpoints.is, AmBreakpoints);
+  </script>
+</dom-module>
