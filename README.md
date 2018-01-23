@@ -34,7 +34,11 @@
           display: none;
         }
       </style>
-      <next-code-block></next-code-block>
+      <dom-bind>
+        <template>
+          <next-code-block></next-code-block>
+        </template>
+      </dom-bind>
     </template>
   </custom-element-demo>
   ```
