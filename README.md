@@ -1,21 +1,61 @@
-# \<am-breakpoints\>
+[![Build Status](https://travis-ci.org/admwx7/am-breakpoints.svg?branch=master)](https://travis-ci.org/admwx7/am-breakpoints)
+![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/admwx7/am-breakpoints)
 
+# &lt;am-breakpoints&gt;
 
+  Material Design: [Responsive UI](https://material.io/guidelines/layout/responsive-ui.html#responsive-ui-breakpoints)
 
-## Install the Polymer-CLI
+  `<am-breakpoints>` is a hidden element for providing status updates on breakpoint changes, relies on a master-slave
+  setup to prevent multiple instances of this element from creating additional media queries.
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your element locally.
+## Installation
 
-## Viewing Your Element
+  Build Tools: `npm i -g polymer-cli`
 
-```
-$ polymer serve
-```
+  Dependencies: `polymer install --variants`
 
-## Running Tests
+  Linting: `npm i && npm run lint`
 
-```
-$ polymer test
-```
+  Testing: `npm run test`
 
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
+## Usage
+
+  <!---
+  ```
+  <custom-element-demo>
+    <template>
+      <script src="../webcomponentsjs/webcomponents-light.js"></script>
+      <link rel="import" href="am-breakpoints.html">
+      <style>
+        [large], [small] {
+          display: block;
+        }
+        h1 {
+          display: none;
+        }
+      </style>
+      <next-code-block></next-code-block>
+    </template>
+  </custom-element-demo>
+  ```
+  -->
+  ```html
+  <am-breakpoints
+    active="{{smallLayout}}"
+    breakpoints="xsmall,small"
+  ></am-breakpoints>
+  <am-breakpoints
+    active="{{largeLayout}}"
+    breakpoints="medium,large,xlarge"
+  ></am-breakpoints>
+  <h1 large$="[[largeLayout]]">Large Title</h1>
+  <h1 small$="[[smallLayout]]">Small Title</h1>
+  ```
+
+## Contributing
+
+  1. Fork it!
+  2. Create your feature branch: `git checkout -b my-new-feature`
+  3. Commit your changes: `git commit -am 'Add some feature'`
+  4. Push to the branch: `git push origin my-new-feature`
+  5. Submit a pull request :D
