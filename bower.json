@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git@github.com:admwx7/am-breakpoints.git"
   },
-  "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+  "license": "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
   "homepage": "https://github.com/admwx7/am-breakpoints",
   "dependencies": {
     "iron-media-query": "PolymerElements/iron-media-query#^2.0.0",
