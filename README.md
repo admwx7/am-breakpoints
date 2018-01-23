@@ -18,7 +18,6 @@
 
   Testing: `npm run test`
 
-
 ## Usage
 
   <!---
