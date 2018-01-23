@@ -3,6 +3,28 @@
 <link rel="import" href="../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 
+<!--
+`am-breakpoints` An element used to match on breakpoints derived from the material design guidelines for
+  [responsive UI](https://material.io/guidelines/layout/responsive-ui.html#responsive-ui-breakpoints).  The first
+  instance bound into your app is flagged as the master and all others are considered slaves, this is used to prevent
+  the same query parameters from having to be replicated everywhere, the slaves will bind to the events fired by the
+  master so they can reflect the flagged queries as needed
+
+Device names, later referred to as `breakpoints`, are derived from the breakpoint system where:
+* handset/tablets in portrait are named as - `<size>-<device>`
+* handsets/tablets in landscape are named as - `<size>-<device>-landscape`
+* window (includes all devices) are named as - `<size>`
+
+Breakpoint examples:
+* Large handset in portrait: `large-handset`
+* Large tablet in landscape: `large-tablet-landscape`
+* all extra small devices: `xsmall`
+* all small devices + large handsets in portrait: `small,large-handset` or `small large-handset`
+
+@element am-breakpoints
+@polymer
+@demo demo/index.html
+-->
 <dom-module id="am-breakpoints">
   <template>
     <style>
@@ -11,7 +33,7 @@
       }
     </style>
 
-    <dom-if if="[[__isMaster]]">
+    <dom-if if="[[master]]" restamp>
       <template>
         <dom-repeat items="{{queries}}" as="queryObj">
           <template>
@@ -29,29 +51,6 @@
 
   <script>
     window.am = window.am || {};
-    /**
-     * `am-breakpoints`
-     * An element used to match on breakpoints derived from the material design guidelines for responsive UI:
-     *  https://material.io/guidelines/layout/responsive-ui.html#responsive-ui-breakpoints
-     * The first instance bound into your app is flagged as the master and all others are considered slaves, this
-     *  is used to prevent the same query parameters from having to be replicated everywhere, the slaves will bind
-     *  to the events fired by the master so they can reflect the flagged queries as needed
-     *
-     * Device names, later referred to as `breakpoints`, are derived from the breakpoint system where:
-     *  * handset/tablets in portrait are named as - `<size>-<device>`
-     *  * handsets/tablets in landscape are named as - `<size>-<device>-landscape`
-     *  * window (includes all devices) are named as - `<size>`
-     *
-     * Breakpoint examples:
-     *  * Large handset in portrait: `large-handset`
-     *  * Large tablet in landscape: `large-tablet-landscape`
-     *  * all extra small devices: `xsmall`
-     *  * all small devices + large handsets in portrait: `small,large-handset` or `small large-handset`
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
     class AmBreakpoints extends Polymer.Element {
       static get is() {
         return 'am-breakpoints';
@@ -249,49 +248,111 @@
             notify: true,
             readOnly: true,
           },
+          /* Triggers this element to take over as the master element during registration */
+          master: {
+            type: Boolean,
+            value: false,
+          },
           /* The device names that are currently being matched on */
           matches: {
             type: String,
             notify: true,
             readOnly: true,
           },
-          // Private properties
-          __isMaster: {
-            type: Boolean,
-            value: true,
-            readOnly: true,
+          /* A promise to track if this element has finished it's registration or not */
+          registered: {
+            type: Promise,
+            notify: true,
+            value() {
+              return new Promise((resolve) => {
+                Polymer.RenderStatus.afterNextRender(this, () => {
+                  resolve(this);
+                });
+              });
+            },
           },
         };
       }
+
       /* Lifecycle Methods */
-      constructor() {
-        super();
-        if (window.am.breakpoints) {
-          this._set__isMaster(false);
-        } else {
+      ready() {
+        super.ready();
+
+        if (!window.am.breakpoints) {
+          // There always needs to be a master element
+          this.master = true;
           window.am.breakpoints = this;
+        } else if (this.master) {
+          // Another element has already registered as the master, however this is the actual master
+          const oldMaster = window.am.breakpoints;
+          window.am.breakpoints = this;
+          oldMaster.masterUpdated();
+        } else {
+          // This is a slave node, register against the master node for updates
+          this.register();
         }
+
+        this.masterUpdated = this.masterUpdated.bind(this);
         this.__updateProperty = this.__updateProperty.bind(this);
       }
-      connectedCallback() {
-        super.connectedCallback();
-        const primaryEl = window.am.breakpoints;
-        if (!this.__isMaster && primaryEl) {
-          primaryEl.addEventListener('matches-changed', this.__updateProperty);
-          primaryEl.addEventListener('max-columns-changed', this.__updateProperty);
-          primaryEl.addEventListener('max-gutter-changed', this.__updateProperty);
-          primaryEl.addEventListener('queries-changed', this.__updateProperty);
+
+      /* Public Methods */
+      /**
+       * Deregisters this element (slave) from the master element's bindings for updating the properties
+       *
+       * @param {HTMLElement} [masterEl=window.am.breakpoints]
+       */
+      deregister(masterEl = window.am.breakpoints) {
+        if (!masterEl) return;
+
+        masterEl.removeEventListener('matches-changed', this.__updateProperty);
+        masterEl.removeEventListener('max-columns-changed', this.__updateProperty);
+        masterEl.removeEventListener('max-gutter-changed', this.__updateProperty);
+        masterEl.removeEventListener('queries-changed', this.__updateProperty);
+        masterEl.removeEventListener('update-master', this.masterUpdated);
+      }
+      /**
+       * Used to make the necessary updates to this element to enable / disable it as the master element
+       *
+       * @param {CustomEvent} event
+       */
+      masterUpdated(event) {
+        if (this.master) {
+          this.master = false;
+          this.dispatchEvent(new CustomEvent('master-updated', {
+            composed: true,
+            bubbles: true,
+          }));
+          this.register();
+        } else {
+          const oldMaster = event.target;
+          this.deregister(oldMaster);
+          this.register();
         }
       }
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        const primaryEl = window.am.breakpoints;
-        if (!this.__isMaster && primaryEl) {
-          primaryEl.removeEventListener('matches-changed', this.__updateProperty);
-          primaryEl.removeEventListener('max-columns-changed', this.__updateProperty);
-          primaryEl.removeEventListener('max-gutter-changed', this.__updateProperty);
-          primaryEl.removeEventListener('queries-changed', this.__updateProperty);
-        }
+      /**
+       * Registers this element (slave) against the master element's bindings for updating properties when they change
+       *  in the future, and sets the values to the master's current values.
+       *
+       * @param {HTMLElement} [masterEl = window.am.breakpoints]
+       */
+      register(masterEl = window.am.breakpoints) {
+        if (!masterEl || !masterEl.registered) return;
+
+        masterEl.registered.then((el) => {
+          if (!el.master) return;
+
+          el.addEventListener('matches-changed', this.__updateProperty);
+          el.addEventListener('max-columns-changed', this.__updateProperty);
+          el.addEventListener('max-gutter-changed', this.__updateProperty);
+          el.addEventListener('queries-changed', this.__updateProperty);
+          el.addEventListener('update-master', this.masterUpdated);
+
+          this.matches = el.matches;
+          this.maxColumns = el.maxColumns;
+          this.maxGutter = el.maxGutter;
+          this.queries = el.queries;
+        });
       }
 
       /* Private Methods */
@@ -376,7 +437,6 @@
         }
       }
     }
-
     window.customElements.define(AmBreakpoints.is, AmBreakpoints);
   </script>
 </dom-module>

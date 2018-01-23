@@ -22,7 +22,55 @@
       <h3>Basic am-breakpoints demo</h3>
       <demo-snippet>
         <template>
-          <am-breakpoints></am-breakpoints>
+          <dom-bind>
+            <template>
+              <am-breakpoints
+                active="{{bp1}}"
+                breakpoints="xsmall,small"
+                matches="{{matches}}"
+              ></am-breakpoints>
+              <am-breakpoints
+                active="{{bp2}}"
+                breakpoints="medium"
+              ></am-breakpoints>
+              <am-breakpoints
+                active="{{bp3}}"
+                breakpoints="large,xlarge"
+              ></am-breakpoints>
+              <am-breakpoints
+                active="{{bp4}}"
+                breakpoints="small-handset-landscape,large-handset-landscape"
+              ></am-breakpoints>
+              <dom-if if="[[injectMaster]]">
+                <template>
+                  <am-breakpoints
+                    active="{{bp5}}"
+                    breakpoints="xsmall,small,medium"
+                    queries='[{"breakpoint":0,"columns":4,"gutter":16,"matches":"small-handset","query":"only screen and (max-width: 359px) and (orientation: portrait)"},{"breakpoint":1440,"columns":12,"gutter":24,"matches":"large","query":"only screen and (min-width: 1424px) and (max-width: 1903px)"}]'
+                    master
+                  ></am-breakpoints>
+                </template>
+              </dom-if>
+
+              <label>
+                <input type="checkbox" checked="{{injectMaster::change}}"/>
+                <span>Enables a master element with overrides to queries</span>
+              </label>
+
+              <hr />
+
+              <div>matches: [[matches]]</div>
+              <div>Break Point 1: [[bp1]]</div>
+              <div>Break Point 2: [[bp2]]</div>
+              <div>Break Point 3: [[bp3]]</div>
+              <div>Break Point 4: [[bp4]]</div>
+              <dom-if if="[[injectMaster]]">
+                <template>
+                  <div>Break Point 5 (master): [[bp5]]</div>
+                </template>
+              </dom-if>
+            </template>
+          </dom-bind>
         </template>
       </demo-snippet>
     </div>
