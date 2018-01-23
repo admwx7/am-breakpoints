@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/admwx7/am-breakpoints.svg?branch=master)](https://travis-ci.org/admwx7/am-breakpoints)
-![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/admwx7/am-breakpoints)
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/admwx7/am-breakpoints)
 
 # &lt;am-breakpoints&gt;
 
@@ -11,11 +11,8 @@
 ## Installation
 
   Build Tools: `npm i -g polymer-cli`
-
   Dependencies: `polymer install --variants`
-
   Linting: `npm i && npm run lint`
-
   Testing: `npm run test`
 
 ## Usage
