@@ -30,7 +30,7 @@
   <script>
     // A safe space for AM elements that need global sharing of information
     // @namespace AM
-    window.AM = AM || {};
+    window.AM = window.AM || {}; // Chrome complains about this without the leading `window.` but only here...
 
     /**
      * `am-breakpoints` An element used to match on breakpoints derived from the material design guidelines for
