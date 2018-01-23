@@ -11,9 +11,13 @@
 ## Installation
 
   Build Tools: `npm i -g polymer-cli`
+
   Dependencies: `polymer install --variants`
+
   Linting: `npm i && npm run lint`
+
   Testing: `npm run test`
+
 
 ## Usage
 
