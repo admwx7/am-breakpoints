@@ -1,20 +1,21 @@
 language: node_js
 sudo: required
 before_script:
-  - npm install -g polymer-cli
-  - polymer install --variants
+- npm install -g polymer-cli
+- polymer install --variants
 node_js: stable
 addons:
   firefox: latest
   apt:
     sources:
-      - google-chrome
+    - google-chrome
     packages:
-      - google-chrome-stable
+    - google-chrome-stable
   sauce_connect: true
 script:
-  - polymer test -l chrome -l firefox
-  - >-
-    if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then polymer test -s 'default';
-    fi
+- polymer test -l chrome -l firefox
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then polymer test -s 'default'; fi
 dist: trusty
+env:
+  global:
+    secure: pxeSqQ8mXa8gLU8nxYEL2Lu/7oEGCosUBaHltlBzUhgOk2d84PKOLqaVQpMaZL0i01EeQ+UPKX513xr8GoYDkOeQs5DiY9xZKnQDSkNprrcSUocZSYHoGq/1LLKc1UXeLalR1bYioOb1BQcSRgTjkISGU3LWbDzMOfpO+7e/LzgtiZGbKX0Amb4lyAZ6PUBIhAv4l1Vs1QlOIy621dPQaDrYEbxqTWL7C6xz+3pbuX9rVE/TTYkt5dPeGBXhlPeJ153I5wWFdzvr771MmYIkL8RdpMIUt9uPiUBQ2DX17CGSFJ7PUd7cCJ/86haTsXKd1DoLKGzO2CSZ+C5943q3XbnR1ekeIzSgdbqWOy8pqwj19y9qFzeoWk9c1SlMBvH+RndwXnnvftJWDaHRFFFwXo67ocR/Wz52CoNZyJqyQosEbl9AoHnnCrQyr+3TnibziI9SpH28UQc0hO8wVAE3yk86lceR3mM1qqA1o7xK+7WlbDUsmdKLQUTmby+Jgn/tffAyob+kQsZOndDJcPgvYRzMycfbyMqfePpyPu9NvfqIxkLXmlZAdhv1ABmzD0dPyfixwIFQ4kl39ItmhtzI2wxC1lZ9SrBm87k5NI+YJoWA2MtPNS42RUa+RFNVJhnXN9bRRKQntbJ/96JT/RxZJyyWfix+3akB1fNhK+hkZbE=
