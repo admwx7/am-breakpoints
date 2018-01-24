@@ -11,7 +11,7 @@
 
     <link rel="import" href="../am-breakpoints.html">
   </head>
-  <body>
+  <body id="body">
     <test-fixture id="basic">
       <template>
         <am-breakpoints
@@ -91,11 +91,12 @@
             });
           });
           it('should have slaves call register()', () => {
+            const body = document.getElementById('body');
             const el = document.createElement('am-breakpoints');
             el.register = sinon.spy();
-            document.children[0].appendChild(el);
+            body.appendChild(el);
             expect(el.register).to.have.been.calledOnce;
-            document.children[0].removeChild(el);
+            body.removeChild(el);
           });
         });
         /* Public Methods */
