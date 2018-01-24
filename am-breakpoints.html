@@ -72,19 +72,10 @@
             type: Number,
             value: 0,
           },
-          /* The maximum number of columns that can be set, you'll want to update queries if you change this */
-          maxColumns: {
-            type: Number,
-            value: 12,
-          },
-          /* The maximum gutter value that can be set, you'll want to update queries if you change this */
-          maxGutter: {
-            type: Number,
-            value: 24,
-          },
           /* The material design specification for queries */
           queries: {
             type: Array,
+            notify: true,
             value() {
               return [
                 /* alternate mediatypes */
@@ -242,13 +233,13 @@
             notify: true,
             readOnly: true,
           },
-          /* The lowest column value among the activeQueries, starts based on maxColumns */
+          /* The lowest column value among the activeQueries or null */
           columns: {
             type: Number,
             notify: true,
             readOnly: true,
           },
-          /* The lowest gutter value among the activeQueries, starts based on maxGutter */
+          /* The lowest gutter value among the activeQueries or null */
           gutter: {
             type: Number,
             notify: true,
@@ -259,7 +250,7 @@
             type: Boolean,
             value: false,
           },
-          /* The device names that are currently being matched on */
+          /* The device names that are currently being matched on or null */
           matches: {
             type: String,
             notify: true,
@@ -269,6 +260,7 @@
           registered: {
             type: Promise,
             notify: true,
+            readOnly: true,
             value() {
               return new Promise((resolve) => {
                 Polymer.RenderStatus.afterNextRender(this, () => {
@@ -315,10 +307,8 @@
         if (!masterEl) return;
 
         masterEl.removeEventListener('matches-changed', this.__updateProperty);
-        masterEl.removeEventListener('max-columns-changed', this.__updateProperty);
-        masterEl.removeEventListener('max-gutter-changed', this.__updateProperty);
         masterEl.removeEventListener('queries-changed', this.__updateProperty);
-        masterEl.removeEventListener('update-master', this.masterUpdated);
+        masterEl.removeEventListener('master-updated', this.masterUpdated);
       }
       /**
        * Used to make the necessary updates to this element to enable / disable it as the master element
@@ -345,27 +335,40 @@
        *  in the future, and sets the values to the master's current values.
        *
        * @param {HTMLElement} [masterEl = AM.breakpoints]
+       * @return {Promise}
        */
       register(masterEl = AM.breakpoints) {
         if (!masterEl || !masterEl.registered) return;
 
-        masterEl.registered.then((el) => {
-          if (!el.master) return;
+        return masterEl.registered.then((el) => {
+          if (!el || !el.master) return;
 
           el.addEventListener('matches-changed', this.__updateProperty);
-          el.addEventListener('max-columns-changed', this.__updateProperty);
-          el.addEventListener('max-gutter-changed', this.__updateProperty);
           el.addEventListener('queries-changed', this.__updateProperty);
-          el.addEventListener('update-master', this.masterUpdated);
+          el.addEventListener('master-updated', this.masterUpdated);
 
           this.matches = el.matches;
-          this.maxColumns = el.maxColumns;
-          this.maxGutter = el.maxGutter;
           this.queries = el.queries;
         });
       }
 
       /* Private Methods */
+      /**
+       * Computes the active property based on the provided breakpoints and what's currently being matched on
+       * @private
+       *
+       * @param {String} breakpoints
+       * @param {String} matches
+       * @return {Boolean}
+       */
+      __computeActive(breakpoints, matches) {
+        // split on space or , for convenience to our users
+        const matchers = (breakpoints || '').split(/[ ,]/);
+        const activeMatchers = (matches || '').split(/[ ,]/);
+        return matchers.some((matcher) => {
+          return matcher && activeMatchers.includes(matcher);
+        });
+      }
       /**
        * Builds out the activeQueries and all properties derived from it: columns, gutter, matches
        * @private
@@ -385,35 +388,19 @@
             // Set the activeQuery to the largest query
             this._setActiveQueries(activeQueries);
             // Build out columns, matches, and gutter
-            let columns = this.maxColumns;
-            let gutter = this.maxGutter;
+            let columns = null;
+            let gutter = null;
             let matches = '';
             activeQueries.forEach((query) => {
-              columns = Math.min(columns, query.columns);
-              gutter = Math.min(gutter, query.gutter);
+              columns = Math.min(typeof columns === 'number' ? columns : (query.columns || 0), (query.columns || 0));
+              gutter = Math.min(typeof gutter === 'number' ? gutter : (query.gutter || 0), (query.gutter || 0));
               matches += `${matches ? ',' : ''}${query.matches}`;
             });
             this._setColumns(columns);
             this._setGutter(gutter);
-            this._setMatches(matches);
+            this._setMatches(matches ? matches : null);
           }
         );
-      }
-      /**
-       * Computes the active property based on the provided breakpoints and what's currently being matched on
-       * @private
-       *
-       * @param {String} breakpoints
-       * @param {String} matches
-       * @return {Boolean}
-       */
-      __computeActive(breakpoints, matches) {
-        // split on space or , for convenience to our users
-        const matchers = (breakpoints || '').split(/[ ,]/);
-        const activeMatchers = (matches || '').split(/[ ,]/);
-        return matchers.some((matcher) => {
-          return matcher && activeMatchers.includes(matcher);
-        });
       }
       /**
        * Used to reflect changes from the primary element into this element
