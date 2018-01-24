@@ -6,7 +6,7 @@
 
     <title>am-breakpoints test</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
 
     <link rel="import" href="../am-breakpoints.html">
@@ -33,262 +33,264 @@
     </test-fixture>
 
     <script>
-      describe('am-breakpoints', () => {
-        let basic;
-        let master;
-        let slave;
-        beforeEach((done) => {
-          window.AM = {};
-          replace('iron-media-query').with('fake-media-query');
-          basic = fixture('basic');
-          slave = fixture('slave');
-          flush(done);
-        });
-
-        it('should instantiate', () => {
-          master = fixture('master');
-          expect(basic.localName).to.equal('am-breakpoints');
-          expect(master.localName).to.equal('am-breakpoints');
-          expect(slave.localName).to.equal('am-breakpoints');
-        });
-        it('should only stamp the template for the master element', (done) => {
-          master = fixture('master');
-          flush(() => {
-            expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
-            expect(master.shadowRoot.querySelectorAll('fake-media-query').length).to.be.greaterThan(0);
-            expect(slave.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
-            done();
-          });
-        });
-        it('should stamp a query for each item in queries when master element', (done) => {
-          expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(master.queries.length);
-          master = fixture('master');
-          flush(() => {
-            expect(master.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(master.queries.length);
-            expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
-            done();
-          });
-        });
-        /* Lifecycle Methods */
-        describe('ready', () => {
-          it('should place the master element in the global namespace', (done) => {
-            master = fixture('master');
-            flush(() => {
-              expect(master).to.deep.equal(AM.breakpoints);
-              done();
-            });
-          });
-          it('should register the first element attached as master', () => {
-            expect(basic).to.deep.equal(AM.breakpoints);
-          });
-          it('should replace the original master with a new one when explicity defined', (done) => {
-            basic.masterUpdated = sinon.spy();
-            master = fixture('master');
-            flush(() => {
-              expect(master).to.deep.equal(AM.breakpoints);
-              expect(basic.masterUpdated).to.have.been.calledOnce;
-              done();
-            });
-          });
-          it('should have slaves call register()', () => {
-            const body = document.getElementById('body');
-            const el = document.createElement('am-breakpoints');
-            el.register = sinon.spy();
-            body.appendChild(el);
-            expect(el.register).to.have.been.calledOnce;
-            body.removeChild(el);
-          });
-        });
-        /* Public Methods */
-        describe('deregister(masterEl)', () => {
+      window.addEventListener('WebComponentsReady', () => {
+        describe('am-breakpoints', () => {
+          let basic;
+          let master;
+          let slave;
           beforeEach((done) => {
-            master = fixture('master');
+            window.AM = {};
+            replace('iron-media-query').with('fake-media-query');
+            basic = fixture('basic');
+            slave = fixture('slave');
             flush(done);
           });
 
-          it('should do nothing when no masterEl is provided', () => {
-            AM.breakpoints = null;
-            basic.deregister();
-          });
-          it('should remove events on the masterEl when provided', () => {
-            master.removeEventListener = sinon.spy();
-            slave.deregister(master);
-            expect(master.removeEventListener).to.have.been.calledWith('matches-changed', slave.__updateProperty);
-            expect(master.removeEventListener).to.have.been.calledWith('queries-changed', slave.__updateProperty);
-            expect(master.removeEventListener).to.have.been.calledWith('master-updated', slave.masterUpdated);
-          });
-        });
-        describe('masterUpdated(event)', () => {
-          beforeEach((done) => {
+          it('should instantiate', () => {
             master = fixture('master');
-            flush(done);
+            expect(basic.localName).to.equal('am-breakpoints');
+            expect(master.localName).to.equal('am-breakpoints');
+            expect(slave.localName).to.equal('am-breakpoints');
           });
-
-          describe('when this.master is true', () => {
-            it('should set this.master to false', () => {
-              master.masterUpdated();
-              expect(master.master).to.be.false;
+          it('should only stamp the template for the master element', (done) => {
+            master = fixture('master');
+            flush(() => {
+              expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
+              expect(master.shadowRoot.querySelectorAll('fake-media-query').length).to.be.greaterThan(0);
+              expect(slave.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
+              done();
             });
-            it('should dispatch a master-updated event', (done) => {
-              master.addEventListener('master-updated', () => {
+          });
+          it('should stamp a query for each item in queries when master element', (done) => {
+            expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(master.queries.length);
+            master = fixture('master');
+            flush(() => {
+              expect(master.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(master.queries.length);
+              expect(basic.shadowRoot.querySelectorAll('fake-media-query').length).to.equal(0);
+              done();
+            });
+          });
+          /* Lifecycle Methods */
+          describe('ready', () => {
+            it('should place the master element in the global namespace', (done) => {
+              master = fixture('master');
+              flush(() => {
+                expect(master).to.deep.equal(AM.breakpoints);
                 done();
               });
-              master.masterUpdated();
             });
-            it('should call register()', () => {
-              master.register = sinon.spy();
-              master.masterUpdated();
-              expect(master.register).to.have.been.called;
+            it('should register the first element attached as master', () => {
+              expect(basic).to.deep.equal(AM.breakpoints);
             });
-          });
-          describe('when this.master is false', () => {
-            beforeEach(() => {
-              slave.deregister = sinon.spy();
-              slave.register = sinon.spy();
-              slave.masterUpdated({target: basic});
+            it('should replace the original master with a new one when explicity defined', (done) => {
+              basic.masterUpdated = sinon.spy();
+              master = fixture('master');
+              flush(() => {
+                expect(master).to.deep.equal(AM.breakpoints);
+                expect(basic.masterUpdated).to.have.been.calledOnce;
+                done();
+              });
             });
-
-            it('should call deregister() with the event.target', () => {
-              expect(slave.deregister).to.have.been.calledWithMatch(basic);
-            });
-            it('should call register()', () => {
-              expect(slave.register).to.have.been.called;
-            });
-          });
-        });
-        describe('register(masterEl)', () => {
-          beforeEach((done) => {
-            master = fixture('master');
-            flush(done);
-          });
-
-          it('should do nothing when there is no masterEl', () => {
-            AM.breakpoints = null;
-            basic.register();
-          });
-          it('should do nothing when there is no masterEl.registered', () => {
-            basic.register( {registered: null} );
-          });
-          it('should do nothing when master.registered rejects', () => {
-            master.addEventListener = sinon.spy();
-            master._setRegistered(Promise.reject());
-            return slave.register(master).catch(() => {});
-          });
-          it('should add event listeners to the master el when master.registered resolves', () => {
-            master.addEventListener = sinon.spy();
-            master._setRegistered(Promise.resolve(master));
-            master.queries = ['foo'];
-            master._setMatches('foo');
-            slave.register(master);
-            return master.registered.then(() => {
-              expect(master.addEventListener).to.be.calledWith('matches-changed', slave.__updateProperty);
-              expect(master.addEventListener).to.be.calledWith('queries-changed', slave.__updateProperty);
-              expect(master.addEventListener).to.be.calledWith('master-updated', slave.masterUpdated);
-              expect(slave.matches).to.equal('foo');
-              expect(slave.queries).to.deep.equal(['foo']);
+            it('should have slaves call register()', () => {
+              const body = document.getElementById('body');
+              const el = document.createElement('am-breakpoints');
+              el.register = sinon.spy();
+              body.appendChild(el);
+              expect(el.register).to.have.been.calledOnce;
+              body.removeChild(el);
             });
           });
-        });
-        /* Private Methods */
-        describe('__computeActive(breakpoints, matches)', () => {
-          beforeEach((done) => {
-            master = fixture('master');
-            flush(done);
-          });
-
-          it('should return true when breakpoints contains at least one entry in matches', () => {
-            expect(basic.__computeActive('foo,bar', 'foo baz')).to.be.true;
-          });
-          it('should return false when breakpoints does not match anything in matches', () => {
-            expect(basic.__computeActive('foo,bar', 'baz quz')).to.be.false;
-          });
-        });
-        describe('__computeActiveQueries()', () => {
-          beforeEach((done) => {
-            master = fixture('master');
-            flush(done);
-          });
-
-          describe('when there are no active queries', () => {
+          /* Public Methods */
+          describe('deregister(masterEl)', () => {
             beforeEach((done) => {
-              master.__computeActiveQueries();
+              master = fixture('master');
               flush(done);
             });
 
-            it('should set activeQueries to an empty array', () => {
-              expect(master.activeQueries).to.deep.equal([]);
+            it('should do nothing when no masterEl is provided', () => {
+              AM.breakpoints = null;
+              basic.deregister();
             });
-            it('should set columns to null', () => {
-              expect(master.columns).to.be.null;
-            });
-            it('should set gutter to null', () => {
-              expect(master.gutter).to.be.null;
-            });
-            it('should set matches to null', () => {
-              expect(master.matches).to.be.null;
+            it('should remove events on the masterEl when provided', () => {
+              master.removeEventListener = sinon.spy();
+              slave.deregister(master);
+              expect(master.removeEventListener).to.have.been.calledWith('matches-changed', slave.__updateProperty);
+              expect(master.removeEventListener).to.have.been.calledWith('queries-changed', slave.__updateProperty);
+              expect(master.removeEventListener).to.have.been.calledWith('master-updated', slave.masterUpdated);
             });
           });
-          describe('when there are active queries', () => {
+          describe('masterUpdated(event)', () => {
             beforeEach((done) => {
-              master.queries[3].active = true;
-              master.queries[10].active = true;
-              master.__computeActiveQueries();
+              master = fixture('master');
               flush(done);
             });
 
-            it('should fetch all currently active queries', () => {
-              expect(master.activeQueries).to.deep.equal([master.queries[3], master.queries[10]]);
+            describe('when this.master is true', () => {
+              it('should set this.master to false', () => {
+                master.masterUpdated();
+                expect(master.master).to.be.false;
+              });
+              it('should dispatch a master-updated event', (done) => {
+                master.addEventListener('master-updated', () => {
+                  done();
+                });
+                master.masterUpdated();
+              });
+              it('should call register()', () => {
+                master.register = sinon.spy();
+                master.masterUpdated();
+                expect(master.register).to.have.been.called;
+              });
             });
-            it('should set columns to the lowest column value', () => {
-              expect(master.columns).to.equal(Math.min(master.queries[3].columns, master.queries[10].columns));
-            });
-            it('should set gutter to the lowest gutter value', () => {
-              expect(master.gutter).to.equal(Math.min(master.queries[3].gutter, master.queries[10].gutter));
-            });
-            it('should set matches to the combined matches properties', () => {
-              expect(master.matches).to.equal(`${master.queries[3].matches},${master.queries[10].matches}`);
-            });
-          });
-        });
-        describe('__updateProperty(event)', () => {
-          beforeEach((done) => {
-            master = fixture('master');
-            flush(done);
-          });
+            describe('when this.master is false', () => {
+              beforeEach(() => {
+                slave.deregister = sinon.spy();
+                slave.register = sinon.spy();
+                slave.masterUpdated({target: basic});
+              });
 
-          describe('when event.detail.path is set', () => {
-            it('should call set based on the provided path and value', () => {
-              const event = new CustomEvent('queries-changed', {
-                composed: true,
-                detail: {
-                  path: 'queries.1.active',
-                  value: true,
-                },
+              it('should call deregister() with the event.target', () => {
+                expect(slave.deregister).to.have.been.calledWithMatch(basic);
               });
-              master.__updateProperty(event);
-              expect(master.queries[1].active).to.be.true;
+              it('should call register()', () => {
+                expect(slave.register).to.have.been.called;
+              });
             });
           });
-          describe('when event.detail.path is not set', () => {
-            it('should call the readOnly setter for readOnly properties', () => {
-              const event = new CustomEvent('gutter-changed', {
-                composed: true,
-                detail: {
-                  value: 5,
-                },
-              });
-              master.__updateProperty(event);
-              expect(master.gutter).to.equal(5);
+          describe('register(masterEl)', () => {
+            beforeEach((done) => {
+              master = fixture('master');
+              flush(done);
             });
-            it('should call set for !readOnly properties', () => {
-              const event = new CustomEvent('debounce-duration-changed', {
-                composed: true,
-                detail: {
-                  value: 100,
-                },
+
+            it('should do nothing when there is no masterEl', () => {
+              AM.breakpoints = null;
+              basic.register();
+            });
+            it('should do nothing when there is no masterEl.registered', () => {
+              basic.register( {registered: null} );
+            });
+            it('should do nothing when master.registered rejects', () => {
+              master.addEventListener = sinon.spy();
+              master._setRegistered(Promise.reject());
+              return slave.register(master).catch(() => {});
+            });
+            it('should add event listeners to the master el when master.registered resolves', () => {
+              master.addEventListener = sinon.spy();
+              master._setRegistered(Promise.resolve(master));
+              master.queries = ['foo'];
+              master._setMatches('foo');
+              slave.register(master);
+              return master.registered.then(() => {
+                expect(master.addEventListener).to.be.calledWith('matches-changed', slave.__updateProperty);
+                expect(master.addEventListener).to.be.calledWith('queries-changed', slave.__updateProperty);
+                expect(master.addEventListener).to.be.calledWith('master-updated', slave.masterUpdated);
+                expect(slave.matches).to.equal('foo');
+                expect(slave.queries).to.deep.equal(['foo']);
               });
-              master.__updateProperty(event);
-              expect(master.debounceDuration).to.equal(100);
+            });
+          });
+          /* Private Methods */
+          describe('__computeActive(breakpoints, matches)', () => {
+            beforeEach((done) => {
+              master = fixture('master');
+              flush(done);
+            });
+
+            it('should return true when breakpoints contains at least one entry in matches', () => {
+              expect(basic.__computeActive('foo,bar', 'foo baz')).to.be.true;
+            });
+            it('should return false when breakpoints does not match anything in matches', () => {
+              expect(basic.__computeActive('foo,bar', 'baz quz')).to.be.false;
+            });
+          });
+          describe('__computeActiveQueries()', () => {
+            beforeEach((done) => {
+              master = fixture('master');
+              flush(done);
+            });
+
+            describe('when there are no active queries', () => {
+              beforeEach((done) => {
+                master.__computeActiveQueries();
+                flush(done);
+              });
+
+              it('should set activeQueries to an empty array', () => {
+                expect(master.activeQueries).to.deep.equal([]);
+              });
+              it('should set columns to null', () => {
+                expect(master.columns).to.be.null;
+              });
+              it('should set gutter to null', () => {
+                expect(master.gutter).to.be.null;
+              });
+              it('should set matches to null', () => {
+                expect(master.matches).to.be.null;
+              });
+            });
+            describe('when there are active queries', () => {
+              beforeEach((done) => {
+                master.queries[3].active = true;
+                master.queries[10].active = true;
+                master.__computeActiveQueries();
+                flush(done);
+              });
+
+              it('should fetch all currently active queries', () => {
+                expect(master.activeQueries).to.deep.equal([master.queries[3], master.queries[10]]);
+              });
+              it('should set columns to the lowest column value', () => {
+                expect(master.columns).to.equal(Math.min(master.queries[3].columns, master.queries[10].columns));
+              });
+              it('should set gutter to the lowest gutter value', () => {
+                expect(master.gutter).to.equal(Math.min(master.queries[3].gutter, master.queries[10].gutter));
+              });
+              it('should set matches to the combined matches properties', () => {
+                expect(master.matches).to.equal(`${master.queries[3].matches},${master.queries[10].matches}`);
+              });
+            });
+          });
+          describe('__updateProperty(event)', () => {
+            beforeEach((done) => {
+              master = fixture('master');
+              flush(done);
+            });
+
+            describe('when event.detail.path is set', () => {
+              it('should call set based on the provided path and value', () => {
+                const event = new CustomEvent('queries-changed', {
+                  composed: true,
+                  detail: {
+                    path: 'queries.1.active',
+                    value: true,
+                  },
+                });
+                master.__updateProperty(event);
+                expect(master.queries[1].active).to.be.true;
+              });
+            });
+            describe('when event.detail.path is not set', () => {
+              it('should call the readOnly setter for readOnly properties', () => {
+                const event = new CustomEvent('gutter-changed', {
+                  composed: true,
+                  detail: {
+                    value: 5,
+                  },
+                });
+                master.__updateProperty(event);
+                expect(master.gutter).to.equal(5);
+              });
+              it('should call set for !readOnly properties', () => {
+                const event = new CustomEvent('debounce-duration-changed', {
+                  composed: true,
+                  detail: {
+                    value: 100,
+                  },
+                });
+                master.__updateProperty(event);
+                expect(master.debounceDuration).to.equal(100);
+              });
             });
           });
         });
