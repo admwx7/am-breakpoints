@@ -2,6 +2,7 @@
   "name": "am-breakpoints",
   "description": "Material Design breakpoints monitoring element",
   "license": "GPL-3.0+",
+  "author": "Austin Murdock <admwx7@gmail.com> (https://amscripting.com)",
   "repository": {
     "type": "git",
     "url": "git@github.com:admwx7/am-breakpoints.git"

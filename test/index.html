@@ -8,10 +8,11 @@
   </head>
   <body>
     <script>
-      // Load and run all tests (.html, .js):
+      // Load and run all tests (.html, .js): each test requires 2 lines
       WCT.loadSuites([
-        'am-breakpoints_test.html',
+        'am-breakpoints_test.html?dom=shadow',
+        'am-breakpoints_test.html?wc-shadydom=true&wc-ce=true',
       ]);
     </script>
-
-</body></html>
+  </body>
+</html>
