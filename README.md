@@ -31,7 +31,7 @@
   ```
   <custom-element-demo>
     <template>
-      <script src="../webcomponentsjs/webcomponents-light.js"></script>
+      <script src="../webcomponentsjs/webcomponents-lite.js"></script>
       <link rel="import" href="am-breakpoints.html">
       <style>
         [large], [small] {
