@@ -1,18 +1,18 @@
 language: node_js
 sudo: false
 before_script:
-- npm run lint
+  - npm i -g eslint eslint-config-google eslint-plugin-chai-expect eslint-plugin-html
+  - npm run lint
 install:
-- npm i -g polymer-cli
-- npm i
-- polymer install --variants
+  - npm i -g bower polymer-cli
+  - npx polymer install
 node_js: stable
 addons:
   firefox: latest
   chrome: stable
 script:
-- polymer test
-- if [ "${TRAVIS_BRANCH}" = "master" ] && [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then polymer test --plugin sauce; fi
+  - npm run test
+  - if [ "${TRAVIS_BRANCH}" = "master" ] && [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then npm run test:sauce; fi
 dist: trusty
 notifications:
   email:
