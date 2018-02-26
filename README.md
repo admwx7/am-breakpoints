@@ -17,13 +17,15 @@
 
 ## Installation
 
-  Build Tools: `npm i -g polymer-cli`
+  Build Tools: `npm i -g polymer-cli bower`
 
-  Dependencies: `polymer install --variants`
+  Dependencies: `polymer install`
 
-  Linting: `npm i && npm run lint`
+  Linting: `npm i -g eslint eslint-config-google eslint-plugin-chai-expect eslint-plugin-html && npm run lint`
 
   Testing: `npm run test`
+
+  IE Support: while *un-tested* IE support *should* only _require_ addition of the String.<includes> polyfill from Babel
 
 ## Usage
 
@@ -51,16 +53,16 @@
   ```
   -->
   ```html
-  <am-breakpoints
-    active="{{smallLayout}}"
-    breakpoints="xsmall,small"
-  ></am-breakpoints>
-  <am-breakpoints
-    active="{{largeLayout}}"
-    breakpoints="medium,large,xlarge"
-  ></am-breakpoints>
-  <h1 large$="[[largeLayout]]">Large Title</h1>
-  <h1 small$="[[smallLayout]]">Small Title</h1>
+    <am-breakpoints
+      active="{{smallLayout}}"
+      breakpoints="xsmall,small"
+    ></am-breakpoints>
+    <am-breakpoints
+      active="{{largeLayout}}"
+      breakpoints="medium,large,xlarge"
+    ></am-breakpoints>
+    <h1 large$="[[largeLayout]]">Large Title</h1>
+    <h1 small$="[[smallLayout]]">Small Title</h1>
   ```
 
 ## Contributing
